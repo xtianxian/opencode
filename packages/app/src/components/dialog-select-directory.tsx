@@ -8,7 +8,12 @@ import { createMemo, createResource, createSignal } from "solid-js"
 import { useLanguage } from "@/context/language"
 import { ServerConnection } from "@/context/server"
 import { useGlobal } from "@/context/global"
-import { cleanPickerInput, createDirectorySearch, displayPickerPath } from "./directory-picker-domain"
+import {
+  cleanPickerInput,
+  createDirectorySearch,
+  directoryPickerResultsWithStart,
+  displayPickerPath,
+} from "./directory-picker-domain"
 
 interface DialogSelectDirectoryProps {
   title?: string
@@ -113,8 +118,14 @@ export function DialogSelectDirectory(props: DialogSelectDirectoryProps) {
 
   const items = async (value: string) => {
     const results = await directories(value)
-    const directoryRows = results.map((absolute) => toRow(absolute, home(), "folders"))
-    return uniqueRows([...recentProjects(), ...directoryRows])
+    const recentRows = recentProjects()
+    const directoryRows = directoryPickerResultsWithStart({
+      filter: value,
+      recent: recentRows,
+      results,
+      start: start(),
+    }).map((absolute) => toRow(absolute, home(), "folders"))
+    return uniqueRows([...recentRows, ...directoryRows])
   }
 
   function resolve(absolute: string) {

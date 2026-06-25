@@ -19,7 +19,11 @@ export function pickAttachmentFiles(input: {
   onError: (error: unknown) => void
 }) {
   if (!input.picker) {
-    input.fallback()
+    try {
+      input.fallback()
+    } catch (error) {
+      input.onError(error)
+    }
     return
   }
   void input
@@ -32,6 +36,11 @@ export function pickAttachmentFiles(input: {
       input.onFile,
     )
     .catch(input.onError)
+}
+
+export function clickAttachmentInput(input: HTMLInputElement | undefined) {
+  if (!input) throw new Error("File picker is not available")
+  input.click()
 }
 
 const IMAGE_MIMES = new Set(ACCEPTED_IMAGE_TYPES)

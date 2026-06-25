@@ -51,7 +51,7 @@ import { usePlatform } from "@/context/platform"
 import { createSessionTabs } from "@/pages/session/helpers"
 import { createTextFragment, getCursorPosition, setCursorPosition, setRangeEdge } from "./prompt-input/editor-dom"
 import { createPromptAttachments } from "./prompt-input/attachments"
-import { ACCEPTED_FILE_TYPES, pickAttachmentFiles } from "./prompt-input/files"
+import { ACCEPTED_FILE_TYPES, clickAttachmentInput, pickAttachmentFiles } from "./prompt-input/files"
 import {
   canNavigateHistoryAtCursor,
   navigatePromptHistory,
@@ -531,7 +531,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
     pickAttachmentFiles({
       picker: platform.openAttachmentPickerDialog,
       directory: () => sdk().directory,
-      fallback: () => fileInputRef?.click(),
+      fallback: () => clickAttachmentInput(fileInputRef),
       onFile: addAttachment,
       onError: (error) =>
         showToast({
@@ -1789,18 +1789,7 @@ export const PromptInput: Component<PromptInputProps> = (props) => {
               />
 
               <div class="pointer-events-none absolute bottom-2 right-2 flex items-center gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept={ACCEPTED_FILE_TYPES.join(",")}
-                  class="hidden"
-                  onChange={(e) => {
-                    const list = e.currentTarget.files
-                    if (list) void addAttachments(Array.from(list))
-                    e.currentTarget.value = ""
-                  }}
-                />
+                {fileAttachmentInput()}
 
                 <div class="flex items-center gap-1 pointer-events-auto">
                   <Tooltip placement="top" inactive={!working() && blank()} value={tip()}>

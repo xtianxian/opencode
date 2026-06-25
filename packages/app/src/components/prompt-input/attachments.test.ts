@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test"
-import { attachmentMime, pickAttachmentFiles } from "./files"
+import { attachmentMime, clickAttachmentInput, pickAttachmentFiles } from "./files"
 import { pasteMode } from "./paste"
 
 describe("attachmentMime", () => {
@@ -58,15 +58,41 @@ describe("pickAttachmentFiles", () => {
 
   test("uses the browser file input when no native picker exists", async () => {
     let fallback = 0
+    let synchronous = false
     pickAttachmentFiles({
       directory: () => "/projects/consectetur-adipiscing",
       fallback: () => {
         fallback += 1
+        synchronous = true
       },
       onFile: async () => undefined,
       onError: () => undefined,
     })
     expect(fallback).toBe(1)
+    expect(synchronous).toBeTrue()
+  })
+
+  test("clicks the hidden browser file input directly", () => {
+    const input = document.createElement("input")
+    input.type = "file"
+    let clicked = 0
+    input.click = () => {
+      clicked += 1
+    }
+    clickAttachmentInput(input)
+    expect(clicked).toBe(1)
+  })
+
+  test("reports browser file input fallback failures", () => {
+    const errors: unknown[] = []
+    pickAttachmentFiles({
+      directory: () => "/projects/consectetur-adipiscing",
+      fallback: () => clickAttachmentInput(undefined),
+      onFile: async () => undefined,
+      onError: (error) => errors.push(error),
+    })
+    expect(errors).toHaveLength(1)
+    expect(errors[0]).toBeInstanceOf(Error)
   })
 
   test("reports native picker failures without rejecting", async () => {

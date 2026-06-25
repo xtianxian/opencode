@@ -118,6 +118,18 @@ export function currentPickerSuggestions<T>(result: { query: string; items: read
   return result.items
 }
 
+export function directoryPickerResultsWithStart(input: {
+  filter: string
+  recent: readonly unknown[]
+  results: readonly string[]
+  start: string | undefined
+}) {
+  if (cleanPickerInput(input.filter)) return [...input.results]
+  if (input.recent.length > 0) return [...input.results]
+  if (input.results.length > 0) return [...input.results]
+  return input.start ? [input.start] : []
+}
+
 export function preloadTreeDirectories(
   parent: string,
   nodes: ReadonlyArray<{ name: string; type: "file" | "directory" }>,

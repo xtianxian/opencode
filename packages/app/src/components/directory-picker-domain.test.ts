@@ -20,6 +20,7 @@ import {
   pickerParent,
   pickerRoot,
   pickerAbsoluteInput,
+  directoryPickerResultsWithStart,
 } from "./directory-picker-domain"
 
 test("maps server directory entries into Pierre paths", () => {
@@ -123,6 +124,41 @@ test("exposes autocomplete results only for their source query", () => {
   const result = { query: "/repo/src", items: ["/repo/src/index.ts"] }
   expect(currentPickerSuggestions(result, "/repo/src")).toEqual(result.items)
   expect(currentPickerSuggestions(result, "/repo/test")).toEqual([])
+})
+
+test("seeds an empty directory picker with the start directory", () => {
+  expect(
+    directoryPickerResultsWithStart({
+      filter: "",
+      recent: [],
+      results: [],
+      start: "/home/luke",
+    }),
+  ).toEqual(["/home/luke"])
+  expect(
+    directoryPickerResultsWithStart({
+      filter: "repos",
+      recent: [],
+      results: [],
+      start: "/home/luke",
+    }),
+  ).toEqual([])
+  expect(
+    directoryPickerResultsWithStart({
+      filter: "",
+      recent: [{ absolute: "/repo" }],
+      results: [],
+      start: "/home/luke",
+    }),
+  ).toEqual([])
+  expect(
+    directoryPickerResultsWithStart({
+      filter: "",
+      recent: [],
+      results: ["/home/luke/repo"],
+      start: "/home/luke",
+    }),
+  ).toEqual(["/home/luke/repo"])
 })
 
 test("scopes file autocomplete to the current browser root", () => {
